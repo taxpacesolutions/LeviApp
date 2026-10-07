@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Levi Reward Bucks",
   description: "Earn, save, and spend Reward Bucks.",
   robots: { index: false, follow: false },
+  appleWebApp: { capable: true, title: "Reward Bucks", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {

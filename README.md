@@ -10,7 +10,21 @@ Built with **Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Supabas
 
 ---
 
-## Quick start
+## Easiest setup (no code, about 30 minutes, free)
+
+1. **GitHub**: the code lives in your private repository.
+2. **Vercel**: sign up with "Continue with GitHub", then *Add New → Project*, pick the repository and press **Deploy**.
+   (The first build fails because it has no database yet; that's expected.)
+3. **Supabase from Vercel**: in the Vercel project open **Storage** (or *Integrations*) → **Supabase** → *Create* / *Connect*.
+   This creates the free database and fills in all the keys automatically.
+4. **Redeploy**: in Vercel → *Deployments* → ⋯ → **Redeploy**. The first build creates the tables and Levi's sample data by itself.
+5. **Open the app**: the first screen asks you to **create the family login** (email + password). That's the only account; Levi doesn't need one.
+6. **On Levi's tablet**: open the address, sign in once, then *Share → Add to Home Screen*. It gets its own icon and opens full screen.
+7. Enter Parent Mode with PIN **1234** and change it.
+
+A daily automatic check (`/api/keepalive`, Vercel Cron) stops the free database from pausing when the app is only used once a week.
+
+## Quick start (developers)
 
 ```bash
 npm install
@@ -33,8 +47,8 @@ npm run dev                     # http://localhost:3000
    3. `supabase/seed.sql`: Levi, sample rewards, LEGO goal, badges, history, PIN `1234`
 
    *Using the Supabase CLI instead?* `supabase link --project-ref <ref>` then `supabase db push` and run `seed.sql` in the SQL Editor (or `supabase db reset` locally, which runs the seed automatically).
-3. **Create your login**: Dashboard → Authentication → Users → **Add user** → *Create new user* (email + password, tick "Auto confirm").
-   The first time this user signs in, they are linked to the seeded parent profile ("Mom").
+3. **Create your login**: just open the app. While no parent account exists, the sign-in page offers **Create the family login**.
+   (Or: Dashboard → Authentication → Users → **Add user**.) The first account is linked to the seeded parent profile ("Mom").
 4. **Turn off public sign-ups**: Authentication → Sign In / Providers → disable *Allow new users to sign up*.
    The app has no sign-up page, but this closes the door completely.
 5. **Copy keys** (Project Settings → API) into `.env.local`:
@@ -44,7 +58,7 @@ npm run dev                     # http://localhost:3000
 | `NEXT_PUBLIC_SUPABASE_URL` | Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `anon` / publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | `service_role` / secret key (**server only**) |
-| `PARENT_SESSION_SECRET` | any random 32+ character string (`openssl rand -base64 48`) |
+| `PARENT_SESSION_SECRET` | optional: random 32+ character string (`openssl rand -base64 48`); derived from the service key if unset |
 | `ALLOWED_EMAILS` | optional, comma-separated allow-list (recommended) |
 
 6. `npm run dev`. If anything is missing, the app shows a **/setup** page listing what's wrong.
