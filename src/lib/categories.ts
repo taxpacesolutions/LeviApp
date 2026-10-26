@@ -31,6 +31,7 @@ const OTHER: CategoryInfo[] = [
   { key: "savings", label: "Savings", emoji: "🐷" },
   { key: "goal", label: "Goal", emoji: "🎯" },
   { key: "savings_bonus", label: "Savings Bonus", emoji: "🐷" },
+  { key: "mission", label: "Mission", emoji: "🎯" },
   { key: "adjustment", label: "Adjustment", emoji: "🛠️" },
 ];
 
@@ -58,4 +59,11 @@ export const RULE_LABELS: Record<string, string> = {
   rewards_redeemed: "Rewards redeemed reaches…",
   goals_completed: "Goals completed reaches…",
   manual: "Given by a parent",
+};
+
+export const MISSION_KINDS: Record<string, string> = {
+  category_days: "Earn for a category on this many days",
+  save_amount: "Put this many Bucks in savings",
+  earn_amount: "Earn this many Bucks",
+  earn_count: "Earn Bucks this many times",
 };

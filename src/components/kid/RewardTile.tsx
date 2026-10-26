@@ -47,7 +47,7 @@ export function RewardTile({ reward, spendable, parentTitle }: { reward: Reward;
                   <p className="text-muted">Left</p>
                 </div>
               </div>
-              <ActionForm action={requestReward} className="mt-5 w-full">
+              <ActionForm action={requestReward} className="mt-5 w-full" sound="pop">
                 <input type="hidden" name="reward_id" value={reward.id} />
                 <SubmitButton>Ask {parentTitle} 🙋</SubmitButton>
               </ActionForm>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getParentContext } from "@/lib/context";
-import { getLedger, getOverview, getPendingRequests } from "@/lib/data";
+import { getGame, getLedger, getOverview, getPendingRequests } from "@/lib/data";
 import { BalanceHero } from "@/components/BalanceHero";
 import { QuickActions } from "@/components/parent/QuickActions";
 import { WeeklySummary } from "@/components/WeeklySummary";
@@ -10,8 +10,9 @@ import { ledgerActions } from "@/components/parent/ledgerActions";
 
 export default async function ParentDashboard() {
   const ctx = await getParentContext();
-  const [o, recent, pending] = await Promise.all([
+  const [o, game, recent, pending] = await Promise.all([
     getOverview(ctx.child.id),
+    getGame(ctx.child.id),
     getLedger(ctx.child.id, "all", 8),
     getPendingRequests(ctx.familyId),
   ]);
@@ -20,6 +21,17 @@ export default async function ParentDashboard() {
   return (
     <div className="space-y-5">
       <BalanceHero available={o.available} savings={o.savings} name={ctx.child.display_name} compact />
+      <Link href="/parent/missions" className="card flex flex-wrap items-center gap-x-4 gap-y-1 p-4 text-sm font-extrabold">
+        <span>
+          {game.level.emoji} Level {game.level.level} · {game.level.title}
+        </span>
+        <span className="text-muted">
+          {game.pet.emoji} {game.pet_name} the {game.pet.name}
+        </span>
+        <span className="text-muted">
+          🎯 {game.missions.filter((m) => m.done).length}/{game.missions.length} missions this week
+        </span>
+      </Link>
       {o.allocated > 0 && (
         <p className="-mt-2 px-1 text-sm font-bold text-muted">
           {o.allocated} of {o.savings} savings Bucks are set aside for goals.

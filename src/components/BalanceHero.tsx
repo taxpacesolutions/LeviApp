@@ -1,4 +1,5 @@
 import { PiggyBank, Wallet } from "lucide-react";
+import { CountUp } from "@/components/ui/CountUp";
 
 export function BalanceHero({
   available,
@@ -19,7 +20,7 @@ export function BalanceHero({
       <div className="relative">
         <p className="text-sm font-bold text-white/70">{name ? `${name}'s Reward Bucks` : "Total Reward Bucks"}</p>
         <p className={`num mt-1 font-black ${compact ? "text-5xl" : "text-7xl"}`}>
-          {total}
+          <CountUp value={total} />
           <span className="ml-2 text-xl font-extrabold text-sun">Bucks</span>
         </p>
         <div className="mt-5 grid grid-cols-2 gap-3">

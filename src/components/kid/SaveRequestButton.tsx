@@ -24,7 +24,7 @@ export function SaveRequestButton({
       disabled={canMove <= 0}
       label={canMove > 0 ? "🐷 Put Bucks in savings" : "No Bucks to save right now"}
     >
-      <ActionForm action={requestSave} className="space-y-5">
+      <ActionForm action={requestSave} className="space-y-5" sound="pop">
         <p className="font-semibold text-muted">
           You have <b className="text-ink">{canMove}</b> Bucks you can move. {parentTitle} will say yes or no.
         </p>

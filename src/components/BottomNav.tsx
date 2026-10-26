@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Target,
   Gift,
+  Swords,
 } from "lucide-react";
 
 const ICONS = {
@@ -26,6 +27,7 @@ const ICONS = {
   rewards: Gift,
   approvals: CheckCircle2,
   settings: Settings,
+  missions: Swords,
 };
 
 export type NavItem = { href: string; label: string; icon: keyof typeof ICONS; badge?: number };

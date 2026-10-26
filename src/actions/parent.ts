@@ -480,3 +480,37 @@ export async function inviteParent(_prev: ActionResult, fd: FormData): Promise<A
     return "Added. Create this user in Supabase Auth, then they can sign in.";
   });
 }
+
+// ---------------------------------------------------------------------------
+// Weekly missions
+// ---------------------------------------------------------------------------
+const MISSION_KINDS = ["category_days", "save_amount", "earn_amount", "earn_count"] as const;
+
+export async function saveMission(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  return parentAction(async (ctx) => {
+    const id = str(fd, "id", 40);
+    if (id) {
+      const { data } = await db().from("missions").select("id").eq("id", id).eq("family_id", ctx.familyId).maybeSingle();
+      if (!data) throw new UserError("Not found.");
+    }
+    const kind = str(fd, "kind") as (typeof MISSION_KINDS)[number];
+    if (!MISSION_KINDS.includes(kind)) throw new UserError("Pick what the mission is about.");
+    const category = kind === "category_days" ? str(fd, "category", 40) : null;
+    if (kind === "category_days" && !EARN_CATEGORIES.some((c) => c.key === category)) throw new UserError("Pick a category.");
+    const row = {
+      title: requiredStr(fd, "title", "a mission name", 60),
+      icon: str(fd, "icon", 16) || "🎯",
+      kind,
+      category,
+      target: int(fd, "target", "Goal number", { min: 1, max: kind === "category_days" ? 7 : 1000 }),
+      reward_bucks: int(fd, "reward_bucks", "Bonus Bucks", { min: 0, max: 100 }),
+      reward_xp: int(fd, "reward_xp", "XP", { min: 0, max: 500 }),
+      active: bool(fd, "active"),
+    };
+    const { error } = id
+      ? await db().from("missions").update(row).eq("id", id).eq("family_id", ctx.familyId)
+      : await db().from("missions").insert({ ...row, family_id: ctx.familyId, sort_order: 100 });
+    if (error) throw new Error(error.message);
+    return id ? "Mission saved." : "Mission created. 🎯";
+  });
+}

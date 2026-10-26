@@ -68,3 +68,15 @@ export async function switchChild(childId: string) {
   (await cookies()).set(CHILD_COOKIE, childId, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
   revalidatePath("/", "layout");
 }
+
+export async function renamePet(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  return familyAction(async (ctx) => {
+    const name = str(fd, "pet_name", 20);
+    if (!name) throw new UserError("Give your pet a name.");
+    const { error } = await db()
+      .from("child_progress")
+      .upsert({ child_id: ctx.child.id, pet_name: name, updated_at: new Date().toISOString() }, { onConflict: "child_id" });
+    if (error) throw new Error(error.message);
+    return `Your pet is now called ${name}! 🦖`;
+  });
+}

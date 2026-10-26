@@ -153,7 +153,7 @@ export interface Overview {
 
 export interface Celebration {
   id: string;
-  kind: "achievement" | "goal" | "streak" | "savings";
+  kind: "achievement" | "goal" | "streak" | "savings" | "level" | "pet" | "mission";
   title: string;
   message: string;
   emoji: string;
@@ -172,3 +172,61 @@ export interface SavingsBonusRule {
 }
 
 export type ActionResult = { ok: boolean; message: string; locked?: boolean } | null;
+
+export interface LevelInfo {
+  level: number;
+  title: string;
+  emoji: string;
+  min_xp: number;
+  next_xp: number | null;
+  next_title: string | null;
+}
+
+export interface PetInfo {
+  stage: number;
+  name: string;
+  emoji: string;
+  min_saved: number;
+  next_saved: number | null;
+  next_name: string | null;
+  next_emoji: string | null;
+}
+
+export type MissionKind = "category_days" | "save_amount" | "earn_amount" | "earn_count";
+
+export interface MissionProgress {
+  id: string;
+  title: string;
+  icon: string;
+  kind: MissionKind;
+  category: string | null;
+  target: number;
+  progress: number;
+  reward_bucks: number;
+  reward_xp: number;
+  done: boolean;
+}
+
+export interface Mission {
+  id: string;
+  title: string;
+  icon: string;
+  kind: MissionKind;
+  target: number;
+  category: string | null;
+  reward_bucks: number;
+  reward_xp: number;
+  active: boolean;
+  sort_order: number;
+}
+
+export interface GameState {
+  xp: number;
+  level: LevelInfo;
+  lifetime_saved: number;
+  pet: PetInfo;
+  pet_name: string;
+  last_saved_at: string | null;
+  pet_happy: boolean;
+  missions: MissionProgress[];
+}

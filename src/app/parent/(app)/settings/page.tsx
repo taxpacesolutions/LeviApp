@@ -40,6 +40,15 @@ export default async function SettingsPage() {
         <ChevronRight className="text-muted" />
       </Link>
 
+      <Link href="/parent/missions" className="card flex items-center gap-3">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-soft text-2xl">🎯</span>
+        <div className="flex-1">
+          <p className="font-extrabold">Weekly missions</p>
+          <p className="text-sm font-semibold text-muted">Challenges that pay a bonus and XP</p>
+        </div>
+        <ChevronRight className="text-muted" />
+      </Link>
+
       <Section
         title="🐷 Savings Bonus"
         sub="Reward keeping Bucks in savings. Paid once per period, into Savings, based on the lowest savings balance during the last full period."

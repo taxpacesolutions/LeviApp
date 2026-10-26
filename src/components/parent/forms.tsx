@@ -23,7 +23,7 @@ export function EarnForm({ childId, childName, presets }: { childId: string; chi
   const [cat, setCat] = useState("");
   const chosen = EARN_CATEGORIES.find((c) => c.key === cat);
   return (
-    <ActionForm action={earnBucks} className="space-y-5">
+    <ActionForm action={earnBucks} className="space-y-5" sound="coin">
       <ChildField childId={childId} />
       <input type="hidden" name="category" value={cat} />
       <div>
@@ -242,7 +242,7 @@ export function GoalMoneyForm({ goal, available, freeSavings }: { goal: Goal; av
         {mode === "savings" && <>Sets aside Bucks already in Savings. Free savings: {freeSavings}. Goal needs {left}.</>}
         {mode === "take" && <>Moves Bucks out of this goal back to free savings. In goal: {goal.saved}.</>}
       </p>
-      <ActionForm key={mode} action={mode === "take" ? takeFromGoal : addToGoal} className="space-y-4">
+      <ActionForm key={mode} action={mode === "take" ? takeFromGoal : addToGoal} className="space-y-4" sound="coin">
         <input type="hidden" name="goal_id" value={goal.id} />
         {mode !== "take" && <input type="hidden" name="source" value={mode} />}
         <AmountPicker presets={[1, 5, 10, 20]} sign="" />

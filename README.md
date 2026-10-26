@@ -114,6 +114,13 @@ Browser ──► Next.js (Server Components + Server Actions) ──► Supabas
 Settings → Savings Bonus: percent (like interest) or a flat amount, a minimum balance, weekly or monthly.
 Once per period it pays into Savings, based on the **lowest** savings balance during the last full period (you have to *keep* it saved). No cron job is needed. It's checked automatically whenever the app opens and can never pay twice for the same period (`savings_bonus_awards` is unique per period). There's also a "Check now" button.
 
+### Game layer: levels, pet, missions, sounds
+- **Levels and XP.** XP = Bucks earned + Bucks put into savings + mission XP. It's computed from the ledger (`child_xp()`), so reversals lower it automatically. 10 named levels (Penny Rookie → Money Master), then "Money Legend" every 300 XP. Level-ups get a celebration.
+- **Savings pet.** A dino that grows with the Bucks Levi has ever saved: 🥚 Egg → 🦎 Hatchling (20) → 🦕 Little Dino (60) → 🦖 Big Dino (150) → 🐉 Mighty Dragon (300). It never shrinks and is never sad. When nothing was saved for a week it is just "waiting for a savings snack". Levi can name it and pat it.
+- **Weekly missions.** These are challenges such as "Read on 3 days" or "Save 10 Bucks". They reset every Monday in the family's timezone and are checked after every transaction. When one is done it pays its bonus once (a `bonus` row, reversible like any other) plus XP. Parents manage them in **Settings → Weekly missions**.
+- **Sounds and animations.** Sounds are synthesized in the browser, with no audio files, and Levi has an on/off switch. Celebrations have coin rain or confetti, and balances count up. Motion is reduced when the device asks for it.
+- Database: `supabase/migrations/20261026000001_gamification.sql`. `npm run build` applies new migration files automatically (tracked in `public._migrations`).
+
 ### Requests and approvals
 - **Redeem Reward** creates a request ("Ask Mom"). Bucks only come out when a parent **approves**.
 - Requests can't be made without enough Available Bucks, counting other pending requests.

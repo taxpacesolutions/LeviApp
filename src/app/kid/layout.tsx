@@ -5,6 +5,7 @@ import { applyDueSavingsBonuses, getUnseenCelebrations } from "@/lib/data";
 import { BottomNav } from "@/components/BottomNav";
 import { ChildSwitcher } from "@/components/ChildSwitcher";
 import { Celebrations } from "@/components/kid/Celebrations";
+import { SoundToggle } from "@/components/kid/SoundToggle";
 
 export default async function KidLayout({ children }: LayoutProps<"/kid">) {
   const ctx = await getFamilyContext();
@@ -23,6 +24,7 @@ export default async function KidLayout({ children }: LayoutProps<"/kid">) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <SoundToggle />
           <ChildSwitcher
             kids={ctx.children.map((c) => ({ id: c.id, name: c.display_name, emoji: c.avatar_emoji }))}
             current={ctx.child.id}
@@ -41,10 +43,10 @@ export default async function KidLayout({ children }: LayoutProps<"/kid">) {
       <BottomNav
         items={[
           { href: "/kid", label: "Home", icon: "home" },
+          { href: "/kid/missions", label: "Missions", icon: "missions" },
           { href: "/kid/goals", label: "Goals", icon: "goals" },
           { href: "/kid/store", label: "Store", icon: "store" },
           { href: "/kid/badges", label: "Badges", icon: "badges" },
-          { href: "/kid/history", label: "History", icon: "history" },
         ]}
       />
     </div>

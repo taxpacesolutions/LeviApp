@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSheet } from "./Sheet";
 import { useToast } from "./Toast";
 import type { ActionResult } from "@/lib/types";
+import { play, type SoundName } from "@/lib/sound";
 
 type Action = (prev: ActionResult, fd: FormData) => Promise<ActionResult>;
 
@@ -20,6 +21,7 @@ export function ActionForm({
   onSuccess,
   showError = true,
   resetOnSuccess = false,
+  sound,
 }: {
   action: Action;
   children: ReactNode;
@@ -28,6 +30,8 @@ export function ActionForm({
   onSuccess?: () => void;
   showError?: boolean;
   resetOnSuccess?: boolean;
+  /** Sound played when the action succeeds. */
+  sound?: SoundName;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const sheet = useSheet();
@@ -39,6 +43,7 @@ export function ActionForm({
   const [state, formAction, pending] = useActionState(async (prev: ActionResult, fd: FormData) => {
     const result = await action(prev, fd);
     if (result?.ok) {
+      if (sound) play(sound);
       toast(result.message, "success");
       if (resetOnSuccess) formRef.current?.reset();
       onSuccess?.();

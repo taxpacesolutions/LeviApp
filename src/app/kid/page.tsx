@@ -1,28 +1,29 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { getFamilyContext } from "@/lib/context";
-import { getGoals, getLedger, getOverview, getPendingRequests } from "@/lib/data";
-import { categoryInfo } from "@/lib/categories";
+import { getGame, getGoals, getLedger, getOverview, getPendingRequests } from "@/lib/data";
 import { percent } from "@/lib/format";
 import { BalanceHero } from "@/components/BalanceHero";
-import { StatCard } from "@/components/StatCard";
-import { WeeklySummary } from "@/components/WeeklySummary";
 import { TxnList } from "@/components/TxnList";
 import { GoalVisual } from "@/components/GoalCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { bestStreak } from "@/components/Streaks";
+import { LevelCard } from "@/components/game/LevelCard";
+import { PetCard } from "@/components/game/PetCard";
+import { MissionList } from "@/components/game/MissionList";
 
 export default async function KidHome() {
   const ctx = await getFamilyContext();
-  const [o, goals, recent, pending] = await Promise.all([
+  const [o, game, goals, recent, pending] = await Promise.all([
     getOverview(ctx.child.id),
+    getGame(ctx.child.id),
     getGoals(ctx.child.id),
-    getLedger(ctx.child.id, "all", 5),
+    getLedger(ctx.child.id, "all", 3),
     getPendingRequests(ctx.familyId, ctx.child.id),
   ]);
   const goal = goals.find((g) => g.status === "active" && !g.purchased_at);
-  const streak = bestStreak(o.streaks);
   const waiting = pending.redemptions.length + pending.transfers.length;
+  const open = game.missions.filter((m) => !m.done);
+  const doneCount = game.missions.length - open.length;
 
   return (
     <div className="space-y-4">
@@ -37,6 +38,30 @@ export default async function KidHome() {
           <ChevronRight className="text-sun-ink" />
         </Link>
       )}
+
+      <LevelCard game={game} compact />
+      <PetCard game={game} />
+
+      <section>
+        <div className="mb-2 mt-2 flex items-center justify-between px-1">
+          <h2 className="text-lg font-extrabold">
+            🎯 This week&apos;s missions{" "}
+            <span className="num text-sm text-muted">
+              {doneCount}/{game.missions.length}
+            </span>
+          </h2>
+          <Link href="/kid/missions" className="text-sm font-extrabold text-brand">
+            All missions
+          </Link>
+        </div>
+        {open.length ? (
+          <MissionList missions={open.slice(0, 2)} />
+        ) : (
+          <p className="card bg-mint-soft text-center font-extrabold text-mint-ink shadow-none">
+            {game.missions.length ? "All missions done this week! 🏆 New ones on Monday." : "No missions yet."}
+          </p>
+        )}
+      </section>
 
       <Link href="/kid/goals" className="card block transition hover:-translate-y-0.5">
         <p className="text-sm font-extrabold text-muted">🎯 Current Goal</p>
@@ -59,24 +84,11 @@ export default async function KidHome() {
         )}
       </Link>
 
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard icon="⭐" label="This week" tone="mint" value={`+${o.week_earned}`} sub="Bucks earned" />
-        <StatCard
-          icon="🔥"
-          label="Streak"
-          tone="sun"
-          value={streak && streak.current > 0 ? `${streak.current} day${streak.current === 1 ? "" : "s"}` : "Ready!"}
-          sub={streak && streak.current > 0 ? categoryInfo(streak.category).label : "Start one today"}
-        />
-      </div>
-
-      <WeeklySummary o={o} />
-
       <section>
         <div className="mb-2 mt-6 flex items-center justify-between px-1">
           <h2 className="text-lg font-extrabold">Recent</h2>
           <Link href="/kid/history" className="text-sm font-extrabold text-brand">
-            See all
+            Your Bucks →
           </Link>
         </div>
         <TxnList rows={recent} tz={ctx.settings.timezone} mode="kid" empty="No Bucks yet. You can do it!" />

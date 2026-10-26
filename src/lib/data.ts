@@ -3,8 +3,10 @@ import { db } from "@/lib/supabase/admin";
 import type {
   Achievement,
   Celebration,
+  GameState,
   Goal,
   LedgerRow,
+  Mission,
   Overview,
   RedemptionRequest,
   Reward,
@@ -165,4 +167,14 @@ export async function getParents(familyId: string) {
 /** Idempotent: pays any Savings Bonus that is due for the previous period. */
 export async function applyDueSavingsBonuses(childId: string) {
   await db().rpc("apply_due_savings_bonuses", { p_child_id: childId });
+}
+
+export async function getGame(childId: string): Promise<GameState> {
+  return check(await db().rpc("child_game", { p_child_id: childId })) as GameState;
+}
+
+export async function getMissions(familyId: string): Promise<Mission[]> {
+  return check(
+    await db().from("missions").select("*").eq("family_id", familyId).order("sort_order").order("created_at"),
+  ) as Mission[];
 }
