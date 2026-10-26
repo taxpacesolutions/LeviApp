@@ -1,5 +1,7 @@
 # 💰 Levi Reward Bucks
 
+> This repository also contains **Home Kingdom**, a separate app in [`home-kingdom/`](home-kingdom/README.md).
+
 A private family reward app that teaches earning, saving, spending and goals.
 It feels like a modern kids' banking app: big numbers, goals with progress bars, a Reward Store, badges and streaks.
 
