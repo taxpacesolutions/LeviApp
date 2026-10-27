@@ -24,6 +24,12 @@ No battles, no streaks, no punishments, no leaderboards. Spanish by default, Eng
 The **＋** button (bottom right) adds a task, a main quest, a team quest, or a message (thanks, help request, project idea).
 ⚙️ **Settings** (gear on Home) has avatar customization, language, default reward amounts, backup download and sign-out.
 
+### Notifications (optional)
+Each of you can turn them on in **⚙️ Settings → Notificaciones**. They only arrive for important things the *other* person did:
+a reward waiting for your approval, your request approved or declined, a help request, a question, a thank-you, and a completed quest.
+Never reminders, never pressure. **Quiet hours: nothing arrives between 11 pm and 8 am** (it's simply skipped; you'll see it in the app).
+On iPhone, install the app to the home screen first (iOS 16.4+). No setup needed: the next deploy creates the notification keys by itself.
+
 ### Starting data
 15 projects from your list with 5–8 realistic starter tasks each, assigned as you described.
 Nothing is completed, no dates are set, and everything is editable.
@@ -159,5 +165,6 @@ Change the code on GitHub (or ask Claude to). Vercel rebuilds automatically with
 - `supabase/seed.sql` — starting quests, shop, campfire questions (idempotent).
 - `supabase/tests/` — run against a plain Postgres: `supabase_mock.sql`, then the migration, `seed.sql`, `security_test.sql`.
 - `src/pixel/` — the pixel engine (`engine.ts`), heroes, icons, kingdom scene.
+- `api/push.ts` — Vercel function that sends push notifications (keys live in the database, created by `scripts/migrate.mjs`).
 - `src/lib/store.tsx` — data loading, realtime sync, offline cache. `src/lib/actions.ts` — every write.
 - `npm run typecheck` · `npm run build`

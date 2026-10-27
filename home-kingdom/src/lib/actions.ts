@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { supabase } from "./supabase";
 import { must, useStore } from "./store";
 import { useT } from "./i18n";
+import { notifyPartner } from "./push";
 import type { Award, CommentKind, Project, Task, TaskStatus } from "./types";
 
 type RpcResult = { awards?: Award[]; unlock?: string | null; status?: string };
@@ -28,7 +29,10 @@ export function useActions() {
       async completeProject(project: Project) {
         const res = await run(() => rpc("hk_complete_project", { p_project: project.id }),
           ["hk_projects", "hk_profiles", "hk_unlocks", "hk_achievements", "hk_ledger"]);
-        if (res) celebrate(res.awards ?? [], res.unlock);
+        if (res) {
+          celebrate(res.awards ?? [], res.unlock);
+          notifyPartner("quest_done", project.id);
+        }
       },
       setProjectStatus(project: Project, status: "not_started" | "in_progress" | "paused") {
         return run(() => rpc("hk_set_project_status", { p_project: project.id, p_status: status }), ["hk_projects"]);
@@ -58,11 +62,13 @@ export function useActions() {
       async buy(itemId: string, payFrom: "self" | "treasury") {
         const res = await run(() => rpc("hk_buy", { p_item: itemId, p_pay_from: payFrom }),
           ["hk_profiles", "hk_households", "hk_redemptions", "hk_unlocks", "hk_achievements", "hk_ledger"]);
+        if (res?.status === "requested") notifyPartner("reward_request", (res as { redemption?: string }).redemption);
         return res?.status;
       },
-      decide(redemptionId: string, approve: boolean) {
-        return run(() => rpc("hk_decide_redemption", { p_redemption: redemptionId, p_approve: approve }),
+      async decide(redemptionId: string, approve: boolean) {
+        const ok = await run(async () => { await rpc("hk_decide_redemption", { p_redemption: redemptionId, p_approve: approve }); return true; },
           ["hk_redemptions", "hk_profiles", "hk_households", "hk_achievements", "hk_ledger"], approve ? t("redeemed") : undefined);
+        if (ok) notifyPartner("reward_decided", redemptionId);
       },
       cancelRedemption(id: string) {
         return run(() => rpc("hk_cancel_redemption", { p_redemption: id }), ["hk_redemptions"]);
@@ -77,8 +83,9 @@ export function useActions() {
       deleteItem(id: string) {
         return run(() => must(supabase.from("hk_shop_items").delete().eq("id", id)), ["hk_shop_items"]);
       },
-      comment(values: { kind: CommentKind; body: string; project_id?: string | null; task_id?: string | null }) {
-        return run(() => must(supabase.from("hk_comments").insert(values)), ["hk_comments"]);
+      async comment(values: { kind: CommentKind; body: string; project_id?: string | null; task_id?: string | null }) {
+        const row = await run(() => must(supabase.from("hk_comments").insert(values).select("id").single()), ["hk_comments"]);
+        if (["help", "question", "appreciation"].includes(values.kind)) notifyPartner("comment", (row as { id?: string } | undefined)?.id);
       },
       ack(id: string) {
         return run(() => rpc("hk_ack_comment", { p_comment: id }), ["hk_comments"]);

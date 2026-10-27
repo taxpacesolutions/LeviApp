@@ -2,13 +2,15 @@
 // tables, security rules and starting quests. Later deploys see the tables
 // already exist and skip that part.
 //
-// It also stores which email belongs to which hero when HK_JESSICA_EMAIL /
+// It also applies later database updates, creates the push-notification
+// keys, and stores which email belongs to which hero when HK_JESSICA_EMAIL /
 // HK_MARIANO_EMAIL are set.
 //
 // Needs a direct Postgres URL (Vercel's Supabase integration provides one).
 // Without it nothing happens and you run the SQL files by hand (see README).
 import { readFileSync } from "node:fs";
 import pg from "pg";
+import webpush from "web-push";
 
 const url = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || process.env.DATABASE_URL;
 if (!url) {
@@ -34,6 +36,29 @@ try {
     await client.query(file("seed.sql"));
     await client.query("commit");
     console.log("[home-kingdom] Done.");
+  }
+
+  // Later additions, applied once each.
+  const steps = [["hk_push_subscriptions", "migrations/002_push_notifications.sql"]];
+  for (const [table, path] of steps) {
+    const { rows: r } = await client.query("select to_regclass($1) is not null as ok", [`public.${table}`]);
+    if (!r[0].ok) {
+      console.log(`[home-kingdom] Applying ${path}…`);
+      await client.query("begin");
+      await client.query(file(path));
+      await client.query("commit");
+    }
+  }
+
+  // Push notification keys: created once, stored only in the database.
+  const { rows: keys } = await client.query("select 1 from public.hk_private_settings where key = 'vapid_private'");
+  if (!keys.length) {
+    const k = webpush.generateVAPIDKeys();
+    await client.query(
+      "insert into public.hk_private_settings (key, value) values ('vapid_public', $1), ('vapid_private', $2) on conflict (key) do nothing",
+      [k.publicKey, k.privateKey],
+    );
+    console.log("[home-kingdom] Push notification keys created.");
   }
   for (const [hero, email] of [
     ["jessica", process.env.HK_JESSICA_EMAIL],
