@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sprite } from "../pixel/Sprite";
 import { ACCESSORIES, DEFAULT_AVATARS, HAIR_COLORS, HAIR_STYLES, HATS, OUTFITS, SKINS, STYLES, heroSprite } from "../pixel/hero";
 import { Field, Panel, Segmented } from "../components/ui";
@@ -8,6 +8,7 @@ import { useT, type TKey } from "../lib/i18n";
 import { DEFAULT_SETTINGS } from "../lib/game";
 import { exportCsv, exportJson } from "../lib/export";
 import { supabase } from "../lib/supabase";
+import { disablePush, enablePush, pushState, type PushState } from "../lib/push";
 import type { Avatar, Lang, Settings as Economy } from "../lib/types";
 
 const LABELS: Record<string, Record<Lang, string>> = {
@@ -31,6 +32,39 @@ function Swatches({ label, value, colors, onChange }: { label: string; value: st
         ))}
       </div>
     </div>
+  );
+}
+
+function Notifications() {
+  const t = useT();
+  const [state, setState] = useState<PushState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+  useEffect(() => { pushState().then(setState).catch(() => setState("unsupported")); }, []);
+  if (!state) return null;
+  const toggle = async () => {
+    setBusy(true);
+    setError(false);
+    try { setState(state === "on" ? await disablePush() : await enablePush()); } catch { setError(true); }
+    setBusy(false);
+  };
+  return (
+    <Panel title={t("notif_title")} icon="chat">
+      <p className="mb-2 text-sm">{t("notif_what")}</p>
+      <p className="mb-3 text-sm text-ink-soft">🌙 {t("notif_quiet")}</p>
+      {state === "needs_install" && <p className="rounded bg-parchment p-2 text-sm">📱 {t("notif_install")}</p>}
+      {state === "unsupported" && <p className="rounded bg-parchment p-2 text-sm">{t("notif_unsupported")}</p>}
+      {state === "denied" && <p className="rounded bg-[#fde3dc] p-2 text-sm">{t("notif_denied")}</p>}
+      {(state === "on" || state === "off") && (
+        <>
+          <p className="mb-2 font-semibold">{state === "on" ? `🔔 ${t("notif_on")}` : `🔕 ${t("notif_off")}`}</p>
+          <button className={`btn w-full ${state === "on" ? "" : "btn-gold"}`} disabled={busy} onClick={toggle}>
+            {state === "on" ? t("notif_disable") : t("notif_enable")}
+          </button>
+        </>
+      )}
+      {error && <p className="mt-2 rounded bg-[#fde3dc] p-2 text-sm">{t("notif_error")}</p>}
+    </Panel>
   );
 }
 
@@ -75,6 +109,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           onClose();
         }}>{t("save")}</button>
       </Panel>
+
+      <Notifications />
 
       <Panel title={t("language")} icon="chat">
         <Segmented label=" " value={me.lang} onChange={(v) => actions.updateProfile(me.id, { lang: v })}

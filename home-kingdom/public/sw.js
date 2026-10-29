@@ -1,6 +1,6 @@
 // Home Kingdom service worker: makes the app open fast and lets you look at
 // the last loaded data while offline. Database calls are never cached here.
-const CACHE = "hk-v3";
+const CACHE = "hk-v4";
 const SHELL = ["/manifest.webmanifest", "/icon.svg", "/icon-192.png"];
 
 // Cache index.html plus every built file it references, so the app opens offline.
@@ -57,5 +57,33 @@ self.addEventListener("fetch", (event) => {
           return res;
         }),
     ),
+  );
+});
+
+// Push notifications (only important things; the server decides what to send).
+self.addEventListener("push", (event) => {
+  let msg = { title: "Home Kingdom", body: "", url: "/" };
+  try { msg = { ...msg, ...event.data.json() }; } catch { /* plain text or empty */ }
+  event.waitUntil(
+    self.registration.showNotification(msg.title, {
+      body: msg.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: { url: msg.url },
+      tag: msg.url,
+    }),
+  );
+});
+
+// Tapping a notification opens (or focuses) the app on the right screen.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      const win = wins.find((w) => w.url.startsWith(self.location.origin));
+      if (win) return win.focus().then((w) => (w && "navigate" in w ? w.navigate(url) : undefined));
+      return self.clients.openWindow(url);
+    }),
   );
 });
